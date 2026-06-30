@@ -5,7 +5,7 @@
       "type": "Feature",
       "properties": {
         "hlb": "0572",
-        "source": "Line 5"
+        "source": "Combined Line 5 and Line 4"
       },
       "geometry": {
         "type": "Polygon",
@@ -39,28 +39,6 @@
               76.2014871,
               10.9297948
             ],
-            [
-              76.2007385,
-              10.9299023
-            ],
-            [
-              76.202814,
-              10.9298408
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "hlb": "0572",
-        "source": "Line 4"
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
             [
               76.2007385,
               10.9299023
@@ -496,10 +474,6 @@
             [
               76.202814,
               10.9298408
-            ],
-            [
-              76.2007385,
-              10.9299023
             ]
           ]
         ]

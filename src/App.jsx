@@ -117,7 +117,7 @@ function App() {
           if (response.ok) {
             const data = await response.json();
             if (data && data.features && data.features.length > 0) {
-              boundaryMap[hlbId] = data.features[0];
+              boundaryMap[hlbId] = data;
             }
           }
         } catch (err) {
