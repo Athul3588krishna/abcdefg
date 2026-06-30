@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StatusCard = ({ isInside, distance, selectedHlb, hasLocation }) => {
+const StatusCard = ({ isInside, distance, selectedHlb, hasLocation, onNavigateToBlock }) => {
   if (!hasLocation) {
     return (
       <div className="status-card-floating warning-pulse">
@@ -53,9 +53,17 @@ const StatusCard = ({ isInside, distance, selectedHlb, hasLocation }) => {
               അതിർത്തിയിൽ സുരക്ഷിതമാണ് (Inside Boundary)
             </span>
           ) : (
-            <span className="distance-badge outside">
-              ⚠️ അതിർത്തിയിൽ നിന്നും {formattedDistance} മീറ്റർ അകലെയാണ് ({formattedDistance}m away)
-            </span>
+            <div className="outside-navigation-row">
+              <span className="distance-badge outside">
+                ⚠️ അതിർത്തിയിൽ നിന്നും {formattedDistance} മീറ്റർ അകലെയാണ് ({formattedDistance}m away)
+              </span>
+              <button 
+                className="btn-navigate-block"
+                onClick={onNavigateToBlock}
+              >
+                🧭 ബ്ലോക്കിലേക്ക് വഴി കാണിക്കുക (Directions to Block)
+              </button>
+            </div>
           )}
         </div>
       )}

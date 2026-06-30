@@ -10,7 +10,7 @@ import LiveLocation from './components/LiveLocation';
 
 // Import services
 import { startTracking, stopTracking } from './services/gps';
-import { checkGeofence } from './services/geofence';
+import { checkGeofence, getPolygonCenter } from './services/geofence';
 import {
   getSelectedHlb,
   saveSelectedHlb,
@@ -42,31 +42,54 @@ function App() {
 
   const activeGeoJson = allBoundaries[selectedHlb] || null;
 
-  // Add house at current location
-  const handleAddHouse = () => {
-    if (!coords) {
-      alert("ലൊക്കേഷൻ ലഭ്യമല്ല. ദയവായി GPS ലഭിക്കുന്നത് വരെ കാത്തിരിക്കുക.\nLocation not acquired yet. Please wait for GPS signal.");
+  // Add house at a specific coordinate (either GPS or clicked on map)
+  const handleAddHouseAtCoords = (lat, lng) => {
+    const houseNumber = prompt("വീട്ടുനമ്പർ നൽകുക:\nEnter House Number:");
+    if (houseNumber === null) return; // Cancelled by user
+    
+    const houseName = prompt("വീട്ടുപേര് നൽകുക:\nEnter House Name:");
+    if (houseName === null) return; // Cancelled by user
+
+    const ownerName = prompt("വീട്ടുടമസ്ഥന്റെ പേര് നൽകുക:\nEnter House Owner Name:");
+    if (ownerName === null) return; // Cancelled by user
+
+    const finalNumber = houseNumber.trim();
+    const finalName = houseName.trim();
+    const finalOwner = ownerName.trim();
+
+    // Require at least one to be filled
+    if (!finalNumber && !finalName && !finalOwner) {
+      alert("വിവരങ്ങൾ ഒന്നും നൽകിയിട്ടില്ല.\nNo details provided.");
       return;
     }
 
-    const houseName = prompt("വീട്ടുപേര് അല്ലെങ്കിൽ വീട്ടുനമ്പർ നൽകുക:\nEnter House Name/Number:");
-    if (houseName === null) return; // Cancelled by user
-    
-    const finalName = houseName.trim() || `House #${houses.length + 1}`;
+    // Evaluate geofence status for these coordinates
+    const geoResult = checkGeofence({ latitude: lat, longitude: lng }, activeGeoJson);
 
     const newHouse = {
       id: Date.now(),
-      name: finalName,
-      latitude: coords.latitude,
-      longitude: coords.longitude,
+      number: finalNumber,
+      name: finalName || 'Unnamed House',
+      owner: finalOwner || 'Unknown Owner',
+      latitude: lat,
+      longitude: lng,
       hlb: selectedHlb,
-      isInside: isInside,
+      isInside: geoResult.isInside,
       timestamp: Date.now()
     };
 
     const updatedHouses = [...houses, newHouse];
     setHouses(updatedHouses);
     saveHouses(updatedHouses);
+  };
+
+  // Add house at current location
+  const handleAddHouse = () => {
+    if (!coords) {
+      alert("ലൊക്കേഷൻ ലഭ്യമല്ല. ദയവായി GPS ലഭിക്കുന്നത് വരെ കാത്തിരിക്കുക.\nLocation not acquired yet. Please wait for GPS signal.");
+      return;
+    }
+    handleAddHouseAtCoords(coords.latitude, coords.longitude);
   };
 
   // Delete house marker
@@ -86,11 +109,11 @@ function App() {
     }
 
     // Format headers and rows
-    const headers = "ID,House_Name_or_Number,Latitude,Longitude,HLB,Geofence_Status,Date_Created\n";
+    const headers = "ID,House_Number,House_Name,Owner_Name,Latitude,Longitude,HLB,Geofence_Status,Date_Created\n";
     const rows = houses
       .map(
         (h) =>
-          `"${h.id}","${h.name.replace(/"/g, '""')}","${h.latitude}","${h.longitude}","${h.hlb}","${
+          `"${h.id}","${(h.number || '').replace(/"/g, '""')}","${(h.name || '').replace(/"/g, '""')}","${(h.owner || '').replace(/"/g, '""')}","${h.latitude}","${h.longitude}","${h.hlb}","${
             h.isInside ? 'Inside' : 'Outside'
           }","${new Date(h.timestamp).toLocaleString('en-IN')}"`
       )
@@ -219,6 +242,15 @@ function App() {
     }
   };
 
+  // Open Google Maps navigation to the center of the active block
+  const handleNavigateToBlock = () => {
+    if (activeGeoJson) {
+      const center = getPolygonCenter(activeGeoJson);
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${center[0]},${center[1]}`;
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Helper Header */}
@@ -252,6 +284,7 @@ function App() {
           distance={distance} 
           selectedHlb={selectedHlb}
           hasLocation={!!coords}
+          onNavigateToBlock={handleNavigateToBlock}
         />
 
         {/* Floating action button for adding house */}
@@ -277,6 +310,7 @@ function App() {
           isInside={isInside}
           houses={houses}
           onDeleteHouse={handleDeleteHouse}
+          onMapClick={handleAddHouseAtCoords}
         />
       </main>
 
@@ -318,6 +352,49 @@ function App() {
               >
                 📥 ലിസ്റ്റ് ഡൗൺലോഡ് ചെയ്യുക (Export CSV - {houses.length})
               </button>
+            </div>
+          </div>
+
+          <div className="dashboard-column separator">
+            <h4>🏠 ചേർത്ത വീടുകൾ (Marked Houses - {houses.length})</h4>
+            <div className="houses-scroll-list">
+              {houses.length === 0 ? (
+                <p className="no-houses-text">
+                  വീടുകൾ ഒന്നും അടയാളപ്പെടുത്തിയിട്ടില്ല.<br/>
+                  <span className="sub-text">മാപ്പിൽ ക്ലിക്ക് ചെയ്‌തോ മുകളിലെ ബട്ടൺ ഉപയോഗിച്ചോ വീടുകൾ ചേർക്കാം.</span>
+                </p>
+              ) : (
+                houses.map((house) => (
+                  <div key={house.id} className="house-list-item">
+                    <span className="house-item-name" title={`${house.number || ''} - ${house.name || ''} (${house.owner || ''})`}>
+                      🏠 {house.number ? `${house.number} - ${house.name}` : house.name}
+                      {house.owner && <span className="house-item-owner"> ({house.owner})</span>}
+                    </span>
+                    <div className="house-item-meta">
+                      <span className={`house-item-badge ${house.isInside ? 'inside' : 'outside'}`}>
+                        {house.isInside ? 'അകത്ത്' : 'പുറത്ത്'}
+                      </span>
+                      <button 
+                        className="btn-navigate-house-small"
+                        onClick={() => {
+                          const url = `https://www.google.com/maps/dir/?api=1&destination=${house.latitude},${house.longitude}`;
+                          window.open(url, '_blank');
+                        }}
+                        title="Navigate to house"
+                      >
+                        🧭
+                      </button>
+                      <button 
+                        className="btn-delete-house-small"
+                        onClick={() => handleDeleteHouse(house.id)}
+                        title="Delete house"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

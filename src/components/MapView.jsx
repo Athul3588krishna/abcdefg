@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Marker, Circle, Polyline, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, Marker, Circle, Polyline, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import * as turf from '@turf/turf';
 
@@ -60,7 +60,17 @@ const houseMarkerIcon = L.divIcon({
   popupAnchor: [0, -10]
 });
 
-const MapView = ({ activeGeoJson, allBoundaries = {}, selectedHlb, coords, trail, autoFollow, mapType, setMapType, isInside, houses = [], onDeleteHouse }) => {
+// Component to handle map click events
+const MapClickHandler = ({ onMapClick }) => {
+  useMapEvents({
+    click(e) {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    }
+  });
+  return null;
+};
+
+const MapView = ({ activeGeoJson, allBoundaries = {}, selectedHlb, coords, trail, autoFollow, mapType, setMapType, isInside, houses = [], onDeleteHouse, onMapClick }) => {
   const [mapBounds, setMapBounds] = useState(null);
 
   // Compute GeoJSON polygon bounds using Turf.js
@@ -135,6 +145,9 @@ const MapView = ({ activeGeoJson, allBoundaries = {}, selectedHlb, coords, trail
         {/* Map state updates */}
         <MapController center={userCenter} autoFollow={autoFollow} bounds={mapBounds} />
 
+        {/* Map click listener to add houses */}
+        {onMapClick && <MapClickHandler onMapClick={onMapClick} />}
+
         {/* Render all boundaries */}
         {Object.entries(allBoundaries).map(([hlbId, geojson]) => {
           const isActive = hlbId === selectedHlb;
@@ -193,8 +206,11 @@ const MapView = ({ activeGeoJson, allBoundaries = {}, selectedHlb, coords, trail
           >
             <Popup className="house-leaflet-popup">
               <div className="house-popup-card">
-                <h5>🏠 {house.name}</h5>
+                <h5>🏠 {house.number ? `${house.number} - ${house.name}` : house.name}</h5>
                 <div className="house-popup-details">
+                  {house.number && <p><strong>House No (നമ്പർ):</strong> {house.number}</p>}
+                  {house.name && <p><strong>House Name (പേര്):</strong> {house.name}</p>}
+                  {house.owner && <p><strong>Owner (ഉടമസ്ഥൻ):</strong> {house.owner}</p>}
                   <p><strong>HLB:</strong> {house.hlb}</p>
                   <p><strong>Lat:</strong> {house.latitude.toFixed(6)}</p>
                   <p><strong>Lng:</strong> {house.longitude.toFixed(6)}</p>
@@ -202,12 +218,23 @@ const MapView = ({ activeGeoJson, allBoundaries = {}, selectedHlb, coords, trail
                     {house.isInside ? '🟢 Inside (അകത്ത്)' : '🔴 Outside (പുറത്ത്)'}
                   </span></p>
                 </div>
-                <button 
-                  className="btn-popup-delete-house"
-                  onClick={() => onDeleteHouse(house.id)}
-                >
-                  Delete 🗑️
-                </button>
+                <div className="house-popup-actions">
+                  <button 
+                    className="btn-popup-navigate"
+                    onClick={() => {
+                      const url = `https://www.google.com/maps/dir/?api=1&destination=${house.latitude},${house.longitude}`;
+                      window.open(url, '_blank');
+                    }}
+                  >
+                    🧭 വഴി കാട്ടുക (Directions)
+                  </button>
+                  <button 
+                    className="btn-popup-delete-house"
+                    onClick={() => onDeleteHouse(house.id)}
+                  >
+                    Delete 🗑️
+                  </button>
+                </div>
               </div>
             </Popup>
           </Marker>

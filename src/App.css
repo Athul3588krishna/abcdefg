@@ -391,8 +391,8 @@ body {
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  gap: 30px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -932,4 +932,112 @@ input:checked + .toggle-slider:before {
     padding: 8px 14px;
     font-size: 0.75rem;
   }
+}
+
+/* Houses Scroll List Styling */
+.houses-scroll-list {
+  max-height: 120px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 5px;
+  margin-top: 5px;
+}
+
+.houses-scroll-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.houses-scroll-list::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.houses-scroll-list::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 4px;
+}
+
+.house-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.house-list-item:hover {
+  background-color: #f1f5f9;
+  border-color: var(--primary-light);
+}
+
+.house-item-name {
+  font-weight: 600;
+  color: var(--text-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.house-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.house-item-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.house-item-badge.inside {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.house-item-badge.outside {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-delete-house-small {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.btn-delete-house-small:hover {
+  background-color: #fee2e2;
+}
+
+.no-houses-text {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-align: center;
+  padding: 15px 0;
+  line-height: 1.4;
+}
+
+.no-houses-text .sub-text {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.house-item-owner {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
 }
