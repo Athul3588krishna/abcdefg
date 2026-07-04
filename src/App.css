@@ -1123,6 +1123,111 @@ input:checked + .toggle-slider:before {
   display: none;
 }
 
+/* ─── Live Statistics HUD ─────────────────────────────────── */
+.stats-hud {
+  position: absolute;
+  left: 14px;
+  bottom: 130px;
+  z-index: 500;
+  background: rgba(17, 24, 39, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 10px 14px;
+  min-width: 180px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.stats-hud-empty {
+  min-width: 0;
+  padding: 8px 12px;
+}
+
+.stats-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.stats-hud-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.stats-hud-total {
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 20px;
+  padding: 2px 8px;
+  animation: stats-pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes stats-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.15); }
+}
+
+.stats-hud-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.stats-hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 5px 4px 4px;
+  gap: 2px;
+  transition: background 0.2s;
+}
+
+.stats-hud-item.stat-inside {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.stats-sym {
+  font-size: 0.9rem;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.stats-val {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+/* On mobile, shift HUD above the bottom sheet handle */
+@media (max-width: 768px) {
+  .stats-hud {
+    bottom: 56px;
+    left: 10px;
+  }
+}
+
+/* Hide from print */
+@media print {
+  .stats-hud { display: none !important; }
+}
+/* ───────────────────────────────────────────────────────────── */
+
 .road-draw-hint {
   position: absolute;
   left: 50%;

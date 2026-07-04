@@ -478,6 +478,20 @@ const filteredHouses = houses.filter(
   (house) => house.hlb === selectedHlb
 );
 
+// Live statistics derived from filteredHouses
+const stats = {
+  total: filteredHouses.length,
+  pucca_residential: filteredHouses.filter(h => h.type === 'pucca_residential').length,
+  kutcha_residential: filteredHouses.filter(h => h.type === 'kutcha_residential').length,
+  pucca_non_residential: filteredHouses.filter(h => h.type === 'pucca_non_residential').length,
+  kutcha_non_residential: filteredHouses.filter(h => h.type === 'kutcha_non_residential').length,
+  roads: filteredHouses.filter(h => h.points?.length === 2).length,
+  landmarks: filteredHouses.filter(h => ['temple','mosque','church','school','dispensary','post_office','well_tap','other'].includes(h.type)).length,
+  inside: filteredHouses.filter(h => h.isInside).length,
+  outside: filteredHouses.filter(h => !h.isInside).length,
+  residential: filteredHouses.filter(h => h.type === 'pucca_residential' || h.type === 'kutcha_residential').length,
+};
+
 return (
     <div className="app-container">
       {/* Helper Header */}
@@ -531,6 +545,42 @@ return (
             <button type="button" onClick={() => setPendingRoad(null)}>✕ Cancel</button>
           </div>
         )}
+
+        {/* Live Statistics HUD */}
+        <div className={`stats-hud ${stats.total === 0 ? 'stats-hud-empty' : ''}`}>
+          <div className="stats-hud-header">
+            <span className="stats-hud-title">📊 HLB {selectedHlb}</span>
+            <span className="stats-hud-total">{stats.total} Items</span>
+          </div>
+          {stats.total > 0 && (
+            <div className="stats-hud-grid">
+              <div className="stats-hud-item" title="Pucca Residential">
+                <span className="stats-sym">☐</span>
+                <span className="stats-val">{stats.pucca_residential}</span>
+              </div>
+              <div className="stats-hud-item" title="Kutcha Residential">
+                <span className="stats-sym">△</span>
+                <span className="stats-val">{stats.kutcha_residential}</span>
+              </div>
+              <div className="stats-hud-item" title="Non-Residential">
+                <span className="stats-sym">◼+▲</span>
+                <span className="stats-val">{stats.pucca_non_residential + stats.kutcha_non_residential}</span>
+              </div>
+              <div className="stats-hud-item" title="Roads">
+                <span className="stats-sym">🛣️</span>
+                <span className="stats-val">{stats.roads}</span>
+              </div>
+              <div className="stats-hud-item" title="Landmarks">
+                <span className="stats-sym">📍</span>
+                <span className="stats-val">{stats.landmarks}</span>
+              </div>
+              <div className={`stats-hud-item ${stats.inside > 0 ? 'stat-inside' : ''}`} title="Inside boundary">
+                <span className="stats-sym">🟢</span>
+                <span className="stats-val">{stats.inside}</span>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Leaflet Map */}
         <MapView
